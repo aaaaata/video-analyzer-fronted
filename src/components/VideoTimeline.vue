@@ -39,6 +39,13 @@ function seekFromPointer(event: MouseEvent) {
 function percent(value: number) {
   return `${Math.min(100, Math.max(0, (value / props.duration) * 100))}%`
 }
+
+function seekFromKeyboard(event: KeyboardEvent) {
+  if (!props.duration) return
+  const step = event.key === 'Home' ? -props.duration : event.key === 'End' ? props.duration :
+    event.key === 'ArrowLeft' ? -5 : event.key === 'ArrowRight' ? 5 : 0
+  if (step) { event.preventDefault(); emit('seek', Math.min(props.duration, Math.max(0, props.currentTime + step))) }
+}
 </script>
 
 <template>
@@ -55,7 +62,9 @@ function percent(value: number) {
     </div>
 
     <div class="timeline-label">检索结果</div>
-    <div class="moment-track" @click="seekFromPointer">
+    <div class="moment-track" role="slider" tabindex="0" aria-label="视频时间轴" aria-valuemin="0"
+      :aria-valuemax="Math.round(duration)" :aria-valuenow="Math.round(currentTime)"
+      @keydown="seekFromKeyboard" @click="seekFromPointer">
       <button
         v-for="(moment, index) in moments"
         :key="`${moment.start}-${moment.end}`"
@@ -72,7 +81,9 @@ function percent(value: number) {
     </div>
 
     <div class="timeline-label heat-label">高光评分</div>
-    <div class="heat-track" @click="seekFromPointer">
+    <div class="heat-track" role="slider" tabindex="0" aria-label="高光时间轴" aria-valuemin="0"
+      :aria-valuemax="Math.round(duration)" :aria-valuenow="Math.round(currentTime)"
+      @keydown="seekFromKeyboard" @click="seekFromPointer">
       <div
         v-for="(score, index) in normalizedScores"
         :key="index"
